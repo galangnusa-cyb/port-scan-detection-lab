@@ -1,0 +1,58 @@
+# Suricata config changes (lab)
+
+File edited:
+- `/etc/suricata/suricata.yaml`
+
+## 1) Capture interface (AF-PACKET)
+Reason: Ubuntu has multiple interfaces; this lab uses `ens34` (192.168.28.128)
+
+```yaml
+af-packet:
+  - interface: ens34
+    cluster-id: 99
+    cluster-type: cluster_flow
+    defrag: yes
+```
+
+## 2) EVE JSON output enabled
+Reason: Send structured telemetry to Splunk from /var/log/suricata/eve.json
+
+```yaml
+outputs:
+  - eve-log:
+      enabled: yes
+      filetype: regular
+      filename: /var/log/suricata/eve.json
+      types:
+        - flow
+        - alert
+        - dns
+        - http
+        - tls
+```
+
+## 3) Rules path + rule file
+Reason: Load downloaded ruleset via suricata-update.
+
+```bash
+default-rule-path: /var/lib/suricata/rules
+
+rule-files:
+  - suricata.rules
+```
+
+## 4) Validation commands
+
+```yaml
+sudo suricata-update
+sudo suricata -T -c /etc/suricata/suricata.yaml -v
+sudo systemctl restart suricata
+sudo systemctl status suricata --no-pager
+```
+
+## 5) Verify log keluar
+
+```bash
+sudo tail -n 50 /var/log/suricata/eve.json
+sudo tail -n 500 /var/log/suricata/eve.json | grep '"event_type":"flow"' | tail
+```
