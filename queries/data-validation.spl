@@ -1,0 +1,4 @@
+index=main sourcetype="suricata:eve"
+| spath
+| stats count by event_type
+| sort - count
