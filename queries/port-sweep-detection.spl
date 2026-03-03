@@ -1,0 +1,7 @@
+index=main sourcetype="suricata:eve"
+| spath
+| where event_type="flow" AND src_ip!="" AND dest_ip!="" AND dest_port!=""
+| bin _time span=1m
+| stats dc(dest_port) as unique_ports values(dest_port) as ports count as events by _time src_ip dest_ip
+| where unique_ports >= 20
+| sort - unique_ports
